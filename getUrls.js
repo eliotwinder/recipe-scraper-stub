@@ -10,20 +10,25 @@ var getHtml = function(url, cb){
       cb(body);
     }
   });
-}
+};
 
-for(var i = 0; i < 10; i++){
-  var url = base_url + i.toString();
-  
+var getRecipeUrl = function(pageNumber, callback){
+  var url = base_url + pageNumber.toString();
+
   getHtml(url, function(body){
-    // console.log(body);
     var $recipe = cheerio.load(body);
     var $recipeDivs = $recipe('.recipe-card');
     for(var recipe = 0; recipe < $recipeDivs.length; recipe++){
-      console.log($recipeDivs[recipe].attribs['data-url']);
+      //callback on the path - '/123456-cheddar-muffins'
+      callback($recipeDivs[recipe].attribs['data-url']);
     }
-  })
-}
+  });
+};
+
+// tests
+// getRecipeUrl(base_url + 1, function(x){
+//   console.log(x);
+// });
 
 
 
