@@ -1,37 +1,30 @@
 var cheerio = require('cheerio');
 var request = require('request');
 var fs = require('fs');
-var base_url = 'http://cooking.nytimes.com/recipes/';
+var base_url = 'http://cooking.nytimes.com';
 
 var getHtml = function(url, cb){
   request(url, function (error, response, body) {
+    if (error) {
+      console.log(error);
+    }
     if (!error && response.statusCode == 200) {
       cb(body);
     }
   });
 };
 
-// can be '1017585-corn-and-jalapeno-muffins' or just '1017585'
+// recipeNumber can be '1017585-corn-and-jalapeno-muffins' or just '1017585'
 var getRecipe = function(recipeNumber, callback){
   var url = base_url + recipeNumber.toString();
   
   console.log('getting recipe for' + recipeNumber);
-  
-  
+
   getHtml(url, function(body){
-    
-  // TODO: needs to be promisified
-  // return {
-    // tags: tags,
-    // }
+    callback(parseRecipe(body));
   });
 };
 
-// SAMPLE RECIPE
-// <li itemprop="ingredients" itemscope="" itemtype="http://data-vocabulary.org/RecipeIngredient">
-//   <span class="quantity">6</span>
-//   <span class="ingredient-name">tablespoons <span itemprop="name">unsalted butter</span>, plus more for buttering muffin tins</span>
-// </li>
 
 var getTags = function($recipe) {
   var $recipeTags = [];
@@ -56,24 +49,40 @@ var getIngredients = function($recipe){
   return ingredients;
 };
 
+var getSteps = function($recipe){
+  var steps = [];
+  $recipe('.recipe-steps li').each(function(){
+    steps.push($recipe(this).text());
+  });
+
+  return steps;
+};
+
 var parseRecipe = function(html){
   var $ = cheerio.load(html);  
   return {
     tags: getTags($),
     ingredients: getIngredients($),
+    steps: getSteps($)
   };
 };
 
-fs.readFile('./sampleRecipe.html', function (err, html) {
-  if (err) {
-      throw err; 
-  }       
+module.exports = getRecipe;
 
-  var $ = cheerio.load(html);
-  console.log(parseRecipe(html)); 
+// SAMPLE RECIPE
+// <li itemprop="ingredients" itemscope="" itemtype="http://data-vocabulary.org/RecipeIngredient">
+//   <span class="quantity">6</span>
+//   <span class="ingredient-name">tablespoons <span itemprop="name">unsalted butter</span>, plus more for buttering muffin tins</span>
+// </li>
 
-});
+// 
+// TEST PARSER W THIS
+// fs.readFile('./sampleRecipe.html', function (err, html) {
+//   if (err) {
+//       throw err; 
+//   }       
 
-// getRecipe('1017585-corn-and-jalapeno-muffins');
-
+//   var $ = cheerio.load(html);
+//   parseRecipe(html);
+// });
 
