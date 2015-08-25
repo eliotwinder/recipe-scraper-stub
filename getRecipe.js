@@ -21,6 +21,7 @@ var getRecipe = function(recipeNumber, callback){
   console.log('getting recipe for' + recipeNumber);
 
   getHtml(url, function(body){
+    var recipe = parseRecipe(body);
     callback(parseRecipe(body));
   });
 };
@@ -58,9 +59,15 @@ var getSteps = function($recipe){
   return steps;
 };
 
+var getName = function($recipe){
+  return $recipe('.recipe-title').text();
+};
+
 var parseRecipe = function(html){
   var $ = cheerio.load(html);  
   return {
+    name: getName($),
+    path: 
     tags: getTags($),
     ingredients: getIngredients($),
     steps: getSteps($)
@@ -69,7 +76,7 @@ var parseRecipe = function(html){
 
 module.exports = getRecipe;
 
-// SAMPLE RECIPE
+// SAMPLE INGREDIENTS DIV
 // <li itemprop="ingredients" itemscope="" itemtype="http://data-vocabulary.org/RecipeIngredient">
 //   <span class="quantity">6</span>
 //   <span class="ingredient-name">tablespoons <span itemprop="name">unsalted butter</span>, plus more for buttering muffin tins</span>

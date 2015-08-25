@@ -1,7 +1,10 @@
 var getRecipeUrls = require('./getRecipeUrls');
 var getRecipe = require('./getRecipe');
+var db = require('./db/config.js')
+var Recipe = require('./db/RecipeSchema.js')
+var dbUtils = require('./db/dbUtils.js')
 
-// get a batch of urecipe urls
+// get a batch of recipe urls
 var getPage = function(pageNumber, callback) {
   getRecipeUrls(1,function(urls){
     var recipes = [];
@@ -22,6 +25,10 @@ var getPage = function(pageNumber, callback) {
   });
 };
 
-// getPage(10, function(recipes){
-//   console.log(recipes);
-// });
+for (var j = 20; j < 60; j++){
+  getPage(j, function(recipes){
+    for (var i = 0; i < recipes.length; i++){
+      dbUtils.addRecipe(recipes[i]);
+    }
+  });
+}
